@@ -1,0 +1,364 @@
+import org.ajoberstar.grgit.Grgit
+import java.time.Instant
+import java.time.format.DateTimeFormatter
+
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'org.whitesource', name: 'whitesource-gradle-plugin', version: '18.8.1'
+
+    }
+}
+plugins {
+    id 'org.ajoberstar.grgit' version '2.2.1'
+    id "org.sonarqube" version "2.6.2"
+    id "com.jfrog.artifactory" version "4.7.3"
+}
+
+apply plugin: 'org.ajoberstar.grgit'
+apply plugin: 'maven-publish'
+apply plugin: "ivy-publish"
+apply plugin: 'whitesource'
+
+// Versioning of the artifact
+def gitInfo = new GitInfo(rootDir.getAbsolutePath());
+def projectVersion = new ProjectVersion(gitInfo)
+version = projectVersion.toString()
+
+whitesource {
+    orgToken System.getenv("WHITESOURCE_ORG_TOKEN")
+
+    productName 'UIM Backend'
+    projectNames([
+        "cache"             : "uim-server:cache",
+        "commons"           : "uim-server:commons",
+        "consent"           : "uim-server:consent",
+        "external-services" : "uim-server:external-services",
+        "mappers"           : "uim-server:mappers",
+        "migration"         : "uim-server:migration",
+        "oauth"             : "uim-server:oauth",
+        "persistence-api"   : "uim-server:persistence-api",
+        "persistence-mongo" : "uim-server:persistence-mongo",
+        "providers"         : "uim-server:providers",
+        "resources"         : "uim-server:resources",
+        "rest-webservice"   : "uim-server:rest-webservice",
+        "server"            : "uim-server:server",
+        "service"           : "uim-server:service",
+        "test"              : "uim-server:test",
+        "redbull-uim-server": "uim-server:redbull-uim-server"
+    ])
+}
+
+sonarqube {
+    properties {
+        property "sonar.host.url", "https://sonarqube.admin-services-production.redbullaws.com"
+        property "sonar.login", System.getenv("SONAR_API_KEY")
+        property "sonar.projectKey", "rbuim"
+        property "sonar.projectName", "UIM Server"
+        property "sonar.projectVersion", "1.0" // TODO set correct version
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.language", "java"
+        property "sonar.java.binaries", "**/build/classes/**"
+        property 'sonar.junit.reportsPaths', ['**/build/test-results/test', '**/build/test-results/integTest']
+    }
+}
+
+
+allprojects {
+
+    ext {
+        groupName = 'com.redbull.uim'
+        projectName = 'redbull-uim-server'
+        projectDescription = 'Red Bull Unified Identity Management Server'
+        appName = groupName + '.' + projectName
+        buildNumber = System.env.SOURCE_BUILD_NUMBER ?: 'local'
+        buildTime = DateTimeFormatter.ISO_INSTANT.format(Instant.now())
+
+        apacheOltuVersion = '1.0.0'
+        apachePoiVersion = '4.1.2'
+        aspectJVersion = '1.9.2'
+        assertJVersion = '3.18.0'
+        assertJGuavaVersion = '3.2.1'
+        awsJavaSDKVersion = '1.11.890'
+        bouncyCastleVersion = '1.65'
+        bucket4jVersion = '4.4.1'
+        caffeineVersion = '2.6.2'
+        docstatsdVersion = '2.0.16'
+        embeddedMongoVersion = '2.0.0'
+        freemarkerVersion = '2.3.26-incubating'
+        guavaVersion = '30.0-jre'
+        gsonVersion = '2.8.5'
+        hamcrestOptionalVersion = '1.0'
+        httpClientVersion = '4.5.6'
+        jacksonVersion = '2.11.3'
+        jasyptSpringBootVersion = '2.1.0'
+        jasyptVersion = '1.9.3'
+        javaServletVersion = '4.0.1';
+        javaValidationVersion = '2.0.1.Final'
+        jaxbApiVersion = '2.4.0-b180830.0359'
+        jsonPathVersion = '2.2.0'
+        junitVersion = '5.7.0'
+        jsonUnitVersion = '2.21.0'
+        jwtVersion = '0.10.6'
+        libphonenumberVersion = '8.10.11'
+        lombokVersion = '1.18.4'
+        mapStructVersion = '1.3.1.Final'
+        migraMongoVersion = '1.1'
+        mockitoVersion = '2.23.4'
+        mongoDriverVersion = '3.12.4'
+        reactiveMongoDriverVersion = '1.13.1'
+        orgJsonVersion = '20160212'
+        owaspHtmlSanitizerVersion = '1.1'
+        sendGridVersion = '3.1.0'
+        skyscreamerVersion = '1.5.0'
+        springBootVersion = '2.2.10.RELEASE'
+        springIntegrationVersion = '5.4.1'
+        springRestDocsVersion = '2.0.4.RELEASE'
+        springSecuritySamlVersion = '1.0.10.RELEASE'
+        springSecurityVersion = '5.4.1'
+        springCloudNetflixVersion = '2.2.1.RELEASE'
+        springVersion = '5.3.1'
+        lettuceVersion = '6.0.1.RELEASE'
+        uniRestVersion = '1.4.9'
+        tikaVersion = '1.22'
+        rxJavaVersion = '1.3.8'
+        rxJavaStreamsVersion = '1.2.1'
+        commonsPool2Version = '2.6.0'
+        commonsCodecVersion = '1.11'
+        jsoupVersion = '1.13.1'
+        slf4jApiVersion = '1.7.25'
+        commonsNetVersion = '3.6'
+        commonsLang3Version = '3.8.1'
+        commonsTextVersion = '1.8'
+        commonsFileuploadVersion = '1.4'
+        openSamlVersion = '2.6.4'
+        //plugins
+        gradleDependencyManagmentVersion = '1.0.4.RELEASE'
+        embeddedRedisVersion = '0.6'
+        reactorVersion = '3.2.5.RELEASE'
+        commonsValidatorVersion = '1.7'
+        commonsBeanutilsVersion = '1.9.4'
+        authJwksVersion = '0.9.0'
+        authJwtVersion = '3.11.0'
+        hibernateValidatorVersion = '6.1.0.Final'
+    }
+
+    //spring boot dependency
+    ext['sendgrid.version'] = sendGridVersion
+
+    group 'com.redbull.uim'
+    apply plugin: 'java'
+    apply plugin: 'eclipse-wtp'
+    apply plugin: 'idea'
+
+    compileJava {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    idea {
+        module {
+            testSourceDirs += file('src/integTest/java')
+            generatedSourceDirs += file('src/integTest/resources')
+        }
+    }
+
+    jar {
+        baseName = groupName + '.' + project.name
+    }
+
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://build.shibboleth.net/nexus/content/repositories/releases/"
+        }
+    }
+
+    sourceSets {
+        integTest {
+            java.srcDir file('src/integTest/java')
+            resources.srcDir file('src/integTest/resources')
+        }
+    }
+
+    test {
+        filter {
+            includeTestsMatching "*Test"
+        }
+    }
+
+    dependencies {
+        compile "com.google.guava:guava:${guavaVersion}"
+        compile "javax.inject:javax.inject:1"
+        compile "org.slf4j:slf4j-api:${slf4jApiVersion}"
+        compile group: 'com.github.vladimir-bukhtoyarov', name: 'bucket4j-core', version: "${bucket4jVersion}"
+
+        compileOnly "org.projectlombok:lombok:${lombokVersion}"
+        annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+        testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+        testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+        testCompile "org.assertj:assertj-core:${assertJVersion}"
+        testCompile "org.assertj:assertj-guava:${assertJGuavaVersion}"
+        testCompile "org.mockito:mockito-core:${mockitoVersion}"
+        testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}") {
+            exclude group: 'org.assertj'
+            exclude group: 'org.skyscreamer'
+        }
+        testCompile "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+        testCompile "org.junit.jupiter:junit-jupiter-params:${junitVersion}"
+        testCompile "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+        testCompile "org.junit.vintage:junit-vintage-engine:${junitVersion}"
+        integTestCompile sourceSets.main.output
+        integTestCompile configurations.testCompile
+        integTestCompile sourceSets.test.output
+        integTestRuntime configurations.testRuntime
+    }
+
+
+    task integTest(type: Test) {
+        group = 'verification'
+        description = 'Runs the integration tests.'
+        testClassesDirs = files(sourceSets.integTest.output.classesDirs.singleFile)
+        classpath = sourceSets.integTest.runtimeClasspath
+        reports.html.setDestination(new File("${project.buildDir}/reports/integTest"))
+        reports.junitXml.setDestination(new File("${project.buildDir}/test-results/integTest"))
+        shouldRunAfter test
+    }
+
+    task cleanGradleIntelliJProject(type: Delete) {
+        delete ".gradle"
+        delete "out"
+        delete "build"
+    }
+
+    check.dependsOn integTest
+
+    apply plugin: 'jacoco'
+    jacoco {
+        toolVersion = "0.8.2"
+    }
+
+    def mergedJacocoFile = "$buildDir/jacoco/mergedJacocoFile.exec"
+
+    subprojects {
+        sonarqube {
+            properties {
+                property "sonar.jacoco.reportPaths", mergedJacocoFile
+            }
+        }
+    }
+
+    task jacocoMergeTest(type: JacocoMerge) {
+        destinationFile = file(mergedJacocoFile)
+        executionData = project.fileTree(dir: '.', include: '**/build/jacoco/*.exec')
+    }
+
+    task jacocoMerge(dependsOn: ['jacocoMergeTest']) {
+        // used to run the other merge tasks
+    }
+
+    task jacocoIntegrationTestReport(type: JacocoReport) {
+        executionData integTest
+        sourceSets sourceSets.main
+    }
+
+    ext.branch = gitInfo.getBranch();
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+        // options.compilerArgs << "-Xlint:deprecation" // Use this option to debug warnings
+    }
+
+    tasks.withType(Test) {
+        systemProperty "file.encoding", "UTF-8"
+    }
+}
+
+configure(subprojects.findAll { it.name != 'commons' }) {
+    dependencies {
+        compile project(':commons')
+    }
+}
+
+wrapper {
+    gradleVersion = '5.1'
+}
+
+class ProjectVersion {
+    GitInfo gitInfo
+
+    ProjectVersion(GitInfo gitInfo) {
+        this.gitInfo = gitInfo
+    }
+
+    @Override
+    String toString() {
+        def date = new Date().format('yyyy.MM.dd')
+        def commitHash = gitInfo.getCommitHash()
+        "$date-$commitHash"
+    }
+}
+
+class GitInfo {
+    Grgit grgit
+    String branch;
+
+    GitInfo(String dir) {
+        this.grgit = Grgit.open('dir': dir)
+        this.branch = grgit.getBranch().current() ? grgit.getBranch().current().getName() : System.env.GIT_BRANCH;
+    }
+
+    String getCommitHash() {
+        grgit.head().id.take(7)
+    }
+}
+
+tasks.register("printVersion") {
+    description = 'Prints the version of the artifact'
+
+    doLast {
+        println version
+    }
+}
+
+tasks.register("printCommitHash") {
+    description = 'Prints the hash of the latest commit'
+
+    doLast {
+        println gitInfo.getCommitHash()
+    }
+}
+
+task allDependencies {
+    dependsOn allprojects.collect { "$it.path:dependencies" }
+}
+
+publishing {
+    publications {
+        debian(IvyPublication) {
+            project(":server").afterEvaluate {
+                // For example: uim-server/server/build/distributions/uimapp_1.11.0-SNAPSHOT.deb
+                artifact source: project(":server").debianPackage.getArchiveFile().get()
+            }
+        }
+    }
+}
+
+artifactory {
+    publish {
+        repository {
+            ivy {
+//              artifactLayout = 'pool/uim/[module]-[revision](-[classifier]).[ext]'
+                artifactLayout = '[module]-[revision].[ext]'
+            }
+        }
+        defaults {
+            publications('debian')
+        }
+    }
+}
+
